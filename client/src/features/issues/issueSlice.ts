@@ -10,6 +10,11 @@ interface Issue {
     severity: 'Low' | 'Medium' | 'High' | 'Critical';
     createdAt: string;
     updatedAt: string;
+    createdBy: {
+        _id: string;
+        name: string;
+        email: string;
+    };
 }
 
 interface IssueState {

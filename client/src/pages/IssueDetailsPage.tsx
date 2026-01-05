@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { deleteIssue, updateIssue } from '../features/issues/issueSlice'; // Ensure getIssues fetches all so we can find it, or implement getIssueById
+import { deleteIssue, updateIssue } from '../features/issues/issueSlice';
 import type { AppDispatch } from '../store';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+
 import {
     Select,
     SelectContent,
@@ -13,7 +13,10 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { Loader2, ArrowLeft, Trash2 } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Loader2, ArrowLeft, Trash2, Save, Calendar, User as UserIcon } from 'lucide-react';
 
 const IssueDetailsPage = () => {
     const { id } = useParams();
@@ -27,7 +30,11 @@ const IssueDetailsPage = () => {
     }));
 
     const [issue, setIssue] = useState<any>(null);
+    const [title, setTitle] = useState('');
+    const [description, setDescription] = useState('');
     const [status, setStatus] = useState('');
+    const [priority, setPriority] = useState('');
+    const [severity, setSeverity] = useState('');
 
     useEffect(() => {
         if (!user) {
@@ -35,21 +42,30 @@ const IssueDetailsPage = () => {
             return;
         }
 
-        // Find issue from store (assuming we already fetched them in dashboard OR we need to fetch specific one)
-        // Ideally we should have a getIssueById thunk, but for now we look in state or fetch all if empty?
         const foundIssue = issues.find((i: any) => i._id === id);
         if (foundIssue) {
             setIssue(foundIssue);
+            setTitle(foundIssue.title);
+            setDescription(foundIssue.description);
             setStatus(foundIssue.status);
+            setPriority(foundIssue.priority);
+            setSeverity(foundIssue.severity);
         } else {
-            // Ideally dispatch getIssue(id)
             navigate('/');
         }
     }, [id, issues, user, navigate]);
 
-    const handleStatusChange = (newStatus: string) => {
-        setStatus(newStatus);
-        dispatch(updateIssue({ id: id!, issueData: { status: newStatus } }));
+    const handleUpdate = () => {
+        dispatch(updateIssue({
+            id: id!,
+            issueData: {
+                title,
+                description,
+                status,
+                priority,
+                severity,
+            }
+        }));
     };
 
     const handleDelete = () => {
@@ -60,61 +76,131 @@ const IssueDetailsPage = () => {
         }
     };
 
-    if (!issue || isLoading) return <div className="p-8"><Loader2 className="animate-spin" /></div>;
+    if (!issue || isLoading) return <div className="flex justify-center p-8"><Loader2 className="animate-spin" /></div>;
 
     return (
         <div className="container mx-auto py-8 px-4">
-            <Button variant="outline" className="mb-4" onClick={() => navigate('/')}>
+            <Button variant="ghost" className="mb-6 pl-0 hover:pl-2 transition-all" onClick={() => navigate('/')}>
                 <ArrowLeft className="mr-2 h-4 w-4" /> Back to Dashboard
             </Button>
 
-            <Card>
-                <CardHeader>
-                    <div className="flex justify-between items-start">
-                        <div>
-                            <CardTitle className="text-2xl">{issue.title}</CardTitle>
-                            <CardDescription className="mt-2">
-                                Created on {new Date(issue.createdAt).toLocaleDateString()}
-                            </CardDescription>
-                        </div>
-                        <Badge variant="outline" className="text-lg">
-                            {issue.priority} Priority
-                        </Badge>
-                    </div>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                    <div>
-                        <h3 className="font-semibold mb-2">Description</h3>
-                        <p className="text-muted-foreground whitespace-pre-wrap">{issue.description}</p>
-                    </div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Main Content Column */}
+                <div className="lg:col-span-2 space-y-6">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Issue Details</CardTitle>
+                            <CardDescription>Edit the details of the issue below.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                            <div className="space-y-2">
+                                <Label htmlFor="title" className="text-base">Title</Label>
+                                <Input
+                                    id="title"
+                                    value={title}
+                                    onChange={(e) => setTitle(e.target.value)}
+                                    className="text-lg font-medium h-12"
+                                    placeholder="Issue Title"
+                                />
+                            </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <h3 className="font-semibold mb-2">Status</h3>
-                            <Select value={status} onValueChange={handleStatusChange}>
-                                <SelectTrigger className="w-[200px]">
-                                    <SelectValue placeholder="Status" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="Open">Open</SelectItem>
-                                    <SelectItem value="In Progress">In Progress</SelectItem>
-                                    <SelectItem value="Resolved">Resolved</SelectItem>
-                                    <SelectItem value="Closed">Closed</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        <div>
-                            <h3 className="font-semibold mb-2">Severity</h3>
-                            <Badge variant="secondary">{issue.severity}</Badge>
-                        </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="description" className="text-base">Description</Label>
+                                <Textarea
+                                    id="description"
+                                    value={description}
+                                    onChange={(e) => setDescription(e.target.value)}
+                                    className="min-h-[300px] text-base leading-relaxed"
+                                    placeholder="Detailed description of the issue..."
+                                />
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+
+                {/* Sidebar Column */}
+                <div className="space-y-6">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Status & Properties</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                            <div className="space-y-2">
+                                <Label>Status</Label>
+                                <Select value={status} onValueChange={setStatus}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Status" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="Open">Open</SelectItem>
+                                        <SelectItem value="In Progress">In Progress</SelectItem>
+                                        <SelectItem value="Resolved">Resolved</SelectItem>
+                                        <SelectItem value="Closed">Closed</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label>Priority</Label>
+                                <Select value={priority} onValueChange={setPriority}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Priority" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="Low">Low</SelectItem>
+                                        <SelectItem value="Medium">Medium</SelectItem>
+                                        <SelectItem value="High">High</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label>Severity</Label>
+                                <Select value={severity} onValueChange={setSeverity}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Severity" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="Low">Low</SelectItem>
+                                        <SelectItem value="Medium">Medium</SelectItem>
+                                        <SelectItem value="High">High</SelectItem>
+                                        <SelectItem value="Critical">Critical</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Metadata</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="flex items-center text-sm text-muted-foreground">
+                                <UserIcon className="mr-2 h-4 w-4" />
+                                <span>Created by <span className="font-medium text-foreground">{issue.createdBy?.name || 'Unknown'}</span></span>
+                            </div>
+                            <div className="flex items-center text-sm text-muted-foreground">
+                                <Calendar className="mr-2 h-4 w-4" />
+                                <span>Created {new Date(issue.createdAt).toLocaleDateString()}</span>
+                            </div>
+                            <div className="flex items-center text-sm text-muted-foreground">
+                                <Calendar className="mr-2 h-4 w-4" />
+                                <span>Updated {new Date(issue.updatedAt || issue.createdAt).toLocaleDateString()}</span>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <div className="flex flex-col gap-3">
+                        <Button size="lg" onClick={handleUpdate} className="w-full">
+                            <Save className="mr-2 h-4 w-4" /> Save Changes
+                        </Button>
+                        <Button variant="destructive" size="lg" onClick={handleDelete} className="w-full">
+                            <Trash2 className="mr-2 h-4 w-4" /> Delete Issue
+                        </Button>
                     </div>
-                </CardContent>
-                <CardFooter className="flex justify-end border-t pt-6">
-                    <Button variant="destructive" onClick={handleDelete}>
-                        <Trash2 className="mr-2 h-4 w-4" /> Delete Issue
-                    </Button>
-                </CardFooter>
-            </Card>
+                </div>
+            </div>
         </div>
     );
 };
