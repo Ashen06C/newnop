@@ -1,0 +1,281 @@
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import { getIssues, createIssue, reset } from '../features/issues/issueSlice';
+import type { AppDispatch, RootState } from '../store';
+import { Button } from '@/components/ui/button';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { Loader2, Plus, Search } from 'lucide-react';
+
+const Dashboard = () => {
+    const navigate = useNavigate();
+    const dispatch = useDispatch<AppDispatch>();
+
+    const { user } = useSelector((state: RootState) => state.auth);
+    const { issues, isLoading, isError, message } = useSelector(
+        (state: RootState) => state.issue
+    );
+
+    const [searchTerm, setSearchTerm] = useState('');
+    const [statusFilter, setStatusFilter] = useState('All');
+    const [newIssue, setNewIssue] = useState({
+        title: '',
+        description: '',
+        priority: 'Medium',
+        severity: 'Medium',
+        status: 'Open',
+    });
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+    useEffect(() => {
+        if (isError) {
+            console.error(message);
+        }
+
+        if (!user) {
+            navigate('/login');
+        } else {
+            dispatch(getIssues());
+        }
+
+        return () => {
+            dispatch(reset());
+        };
+    }, [user, navigate, isError, message, dispatch]);
+
+    const filteredIssues = issues.filter((issue) => {
+        const matchesSearch = issue.title
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase());
+        const matchesStatus =
+            statusFilter === 'All' || issue.status === statusFilter;
+        return matchesSearch && matchesStatus;
+    });
+
+    const handleCreateIssue = () => {
+        dispatch(createIssue(newIssue)).then((res) => {
+            if (res.meta.requestStatus === 'fulfilled') {
+                setIsDialogOpen(false);
+                setNewIssue({
+                    title: '',
+                    description: '',
+                    priority: 'Medium',
+                    severity: 'Medium',
+                    status: 'Open',
+                });
+            }
+        });
+    };
+
+    const getStatusColor = (status: string) => {
+        switch (status) {
+            case 'Open':
+                return 'default'; // primary
+            case 'In Progress':
+                return 'secondary'; // yellow-ish usually or secondary
+            case 'Resolved':
+                return 'outline'; // green-ish usually
+            case 'Closed':
+                return 'destructive'; // red/gray
+            default:
+                return 'default';
+        }
+    };
+
+    if (isLoading) {
+        return <div className="flex justify-center p-8"><Loader2 className="animate-spin" /></div>;
+    }
+
+    return (
+        <div className="container mx-auto py-8 px-4">
+            <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+                <h1 className="text-3xl font-bold">Issues</h1>
+                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                    <DialogTrigger asChild>
+                        <Button>
+                            <Plus className="mr-2 h-4 w-4" /> New Issue
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[425px]">
+                        <DialogHeader>
+                            <DialogTitle>Create New Issue</DialogTitle>
+                            <DialogDescription>
+                                Add a new issue to the tracker. Click save when you're done.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <div className="grid gap-4 py-4">
+                            <div className="grid grid-cols-4 items-center gap-4">
+                                <Label htmlFor="title" className="text-right">
+                                    Title
+                                </Label>
+                                <Input
+                                    id="title"
+                                    value={newIssue.title}
+                                    onChange={(e) =>
+                                        setNewIssue({ ...newIssue, title: e.target.value })
+                                    }
+                                    className="col-span-3"
+                                />
+                            </div>
+                            <div className="grid grid-cols-4 items-center gap-4">
+                                <Label htmlFor="description" className="text-right">
+                                    Description
+                                </Label>
+                                <Textarea
+                                    id="description"
+                                    value={newIssue.description}
+                                    onChange={(e) =>
+                                        setNewIssue({ ...newIssue, description: e.target.value })
+                                    }
+                                    className="col-span-3"
+                                />
+                            </div>
+                            <div className="grid grid-cols-4 items-center gap-4">
+                                <Label htmlFor="priority" className="text-right">
+                                    Priority
+                                </Label>
+                                <Select
+                                    value={newIssue.priority}
+                                    onValueChange={(val) =>
+                                        setNewIssue({ ...newIssue, priority: val })
+                                    }
+                                >
+                                    <SelectTrigger className="col-span-3">
+                                        <SelectValue placeholder="Select priority" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="Low">Low</SelectItem>
+                                        <SelectItem value="Medium">Medium</SelectItem>
+                                        <SelectItem value="High">High</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="grid grid-cols-4 items-center gap-4">
+                                <Label htmlFor="severity" className="text-right">
+                                    Severity
+                                </Label>
+                                <Select
+                                    value={newIssue.severity}
+                                    onValueChange={(val) =>
+                                        setNewIssue({ ...newIssue, severity: val })
+                                    }
+                                >
+                                    <SelectTrigger className="col-span-3">
+                                        <SelectValue placeholder="Select severity" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="Low">Low</SelectItem>
+                                        <SelectItem value="Medium">Medium</SelectItem>
+                                        <SelectItem value="High">High</SelectItem>
+                                        <SelectItem value="Critical">Critical</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+                        <DialogFooter>
+                            <Button onClick={handleCreateIssue}>Save changes</Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+            </div>
+
+            <div className="flex gap-4 mb-6">
+                <div className="relative w-full max-w-sm">
+                    <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                        placeholder="Search issues..."
+                        className="pl-8"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                </div>
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Filter by Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="All">All Statuses</SelectItem>
+                        <SelectItem value="Open">Open</SelectItem>
+                        <SelectItem value="In Progress">In Progress</SelectItem>
+                        <SelectItem value="Resolved">Resolved</SelectItem>
+                        <SelectItem value="Closed">Closed</SelectItem>
+                    </SelectContent>
+                </Select>
+            </div>
+
+            <div className="rounded-md border">
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Title</TableHead>
+                            <TableHead>Status</TableHead>
+                            <TableHead>Priority</TableHead>
+                            <TableHead>Severity</TableHead>
+                            <TableHead className="text-right">Actions</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {filteredIssues.length > 0 ? (
+                            filteredIssues.map((issue) => (
+                                <TableRow key={issue._id}>
+                                    <TableCell className="font-medium">{issue.title}</TableCell>
+                                    <TableCell>
+                                        <Badge variant={getStatusColor(issue.status) as any}>
+                                            {issue.status}
+                                        </Badge>
+                                    </TableCell>
+                                    <TableCell>{issue.priority}</TableCell>
+                                    <TableCell>{issue.severity}</TableCell>
+                                    <TableCell className="text-right">
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => navigate(`/issues/${issue._id}`)}
+                                        >
+                                            View
+                                        </Button>
+                                    </TableCell>
+                                </TableRow>
+                            ))
+                        ) : (
+                            <TableRow>
+                                <TableCell colSpan={5} className="h-24 text-center">
+                                    No results.
+                                </TableCell>
+                            </TableRow>
+                        )}
+                    </TableBody>
+                </Table>
+            </div>
+        </div>
+    );
+};
+
+export default Dashboard;
