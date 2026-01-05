@@ -27,12 +27,13 @@ export const registerUser = async (req: Request, res: Response) => {
                 _id: user._id,
                 name: user.name,
                 email: user.email,
-                token: generateToken((user._id as unknown) as string),
+                token: generateToken(user._id.toString()),
             });
         } else {
             res.status(400).json({ message: 'Invalid user data' });
         }
     } catch (error) {
+        console.error('Register Error:', error);
         if (error instanceof Error) {
             res.status(500).json({ message: error.message });
         } else {
