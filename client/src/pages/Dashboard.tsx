@@ -32,7 +32,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, Plus, Search } from 'lucide-react';
+import { Loader2, Plus, Search, ArrowRight } from 'lucide-react';
 
 const Dashboard = () => {
     const navigate = useNavigate();
@@ -94,16 +94,29 @@ const Dashboard = () => {
         });
     };
 
-    const getStatusColor = (status: string) => {
+    const getStatusBadgeVariant = (status: string) => {
         switch (status) {
             case 'Open':
-                return 'default'; // primary
+                return 'info';
             case 'In Progress':
-                return 'secondary'; // yellow-ish usually or secondary
+                return 'warning';
             case 'Resolved':
-                return 'outline'; // green-ish usually
+                return 'success';
             case 'Closed':
-                return 'destructive'; // red/gray
+                return 'secondary';
+            default:
+                return 'default';
+        }
+    };
+
+    const getPriorityBadgeVariant = (priority: string) => {
+        switch (priority) {
+            case 'High':
+                return 'destructive';
+            case 'Medium':
+                return 'warning';
+            case 'Low':
+                return 'success';
             default:
                 return 'default';
         }
@@ -119,7 +132,7 @@ const Dashboard = () => {
                 <h1 className="text-3xl font-bold">Issues</h1>
                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                     <DialogTrigger asChild>
-                        <Button>
+                        <Button className="cursor-pointer">
                             <Plus className="mr-2 h-4 w-4" /> New Issue
                         </Button>
                     </DialogTrigger>
@@ -236,9 +249,9 @@ const Dashboard = () => {
                         <TableRow>
                             <TableHead>Title</TableHead>
                             <TableHead>Status</TableHead>
+                            <TableHead>Description</TableHead>
+                            <TableHead>Created By</TableHead>
                             <TableHead>Priority</TableHead>
-                            <TableHead>Severity</TableHead>
-                            <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -247,19 +260,28 @@ const Dashboard = () => {
                                 <TableRow key={issue._id}>
                                     <TableCell className="font-medium">{issue.title}</TableCell>
                                     <TableCell>
-                                        <Badge variant={getStatusColor(issue.status) as any}>
+                                        <Badge variant={getStatusBadgeVariant(issue.status) as any}>
                                             {issue.status}
                                         </Badge>
                                     </TableCell>
-                                    <TableCell>{issue.priority}</TableCell>
-                                    <TableCell>{issue.severity}</TableCell>
+                                    <TableCell className="max-w-[200px] truncate">
+                                        {issue.description}
+                                    </TableCell>
+                                    <TableCell>{issue.createdBy?.name || 'Unknown'}</TableCell>
+                                    <TableCell>
+                                        <Badge variant={getPriorityBadgeVariant(issue.priority) as any}>
+                                            {issue.priority}
+                                        </Badge>
+                                    </TableCell>
                                     <TableCell className="text-right">
                                         <Button
+                                            className="cursor-pointer"
                                             variant="ghost"
                                             size="sm"
                                             onClick={() => navigate(`/issues/${issue._id}`)}
                                         >
                                             View
+                                            <ArrowRight className="h-4 w-4" />
                                         </Button>
                                     </TableCell>
                                 </TableRow>

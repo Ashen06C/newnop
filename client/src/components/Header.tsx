@@ -29,7 +29,7 @@ const Header = () => {
         <header className="border-b bg-background">
             <div className="container mx-auto flex h-16 items-center justify-between px-4">
                 <Link to="/" className="text-2xl font-bold tracking-tight">
-                    IssueTracker
+                    Issue Tracker
                 </Link>
 
                 <nav className="flex items-center gap-4">
@@ -40,7 +40,7 @@ const Header = () => {
                             </Button>
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                                    <Button variant="ghost" className="relative h-8 w-8 rounded-full cursor-pointer">
                                         <Avatar className="h-8 w-8">
                                             <AvatarImage src="/avatars/01.png" alt="@shadcn" />
                                             <AvatarFallback>{user.name ? user.name.charAt(0).toUpperCase() : 'U'}</AvatarFallback>

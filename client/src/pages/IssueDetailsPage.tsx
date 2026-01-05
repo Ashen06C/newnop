@@ -5,6 +5,17 @@ import { deleteIssue, updateIssue } from '../features/issues/issueSlice';
 import type { AppDispatch } from '../store';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 import {
     Select,
@@ -69,18 +80,16 @@ const IssueDetailsPage = () => {
     };
 
     const handleDelete = () => {
-        if (window.confirm('Are you sure you want to delete this issue?')) {
-            dispatch(deleteIssue(id!)).then(() => {
-                navigate('/');
-            });
-        }
+        dispatch(deleteIssue(id!)).then(() => {
+            navigate('/');
+        });
     };
 
     if (!issue || isLoading) return <div className="flex justify-center p-8"><Loader2 className="animate-spin" /></div>;
 
     return (
         <div className="container mx-auto py-8 px-4">
-            <Button variant="ghost" className="mb-6 pl-0 hover:pl-2 transition-all" onClick={() => navigate('/')}>
+            <Button variant="ghost" className="mb-6 pl-0 hover:pl-2 transition-all cursor-pointer" onClick={() => navigate('/')}>
                 <ArrowLeft className="mr-2 h-4 w-4" /> Back to Dashboard
             </Button>
 
@@ -192,12 +201,47 @@ const IssueDetailsPage = () => {
                     </Card>
 
                     <div className="flex flex-col gap-3">
-                        <Button size="lg" onClick={handleUpdate} className="w-full">
-                            <Save className="mr-2 h-4 w-4" /> Save Changes
-                        </Button>
-                        <Button variant="destructive" size="lg" onClick={handleDelete} className="w-full">
-                            <Trash2 className="mr-2 h-4 w-4" /> Delete Issue
-                        </Button>
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <Button size="lg" className="w-full cursor-pointer">
+                                    <Save className="mr-2 h-4 w-4" /> Save Changes
+                                </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Save Changes?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        Are you sure you want to update this issue with the current details?
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={handleUpdate}>Save</AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <Button variant="destructive" size="lg" className="w-full cursor-pointer">
+                                    <Trash2 className="mr-2 h-4 w-4" /> Delete Issue
+                                </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        This action cannot be undone. This will permanently delete the issue.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                                        Delete
+                                    </AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
                     </div>
                 </div>
             </div>
