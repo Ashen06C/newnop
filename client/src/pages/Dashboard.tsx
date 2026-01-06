@@ -270,9 +270,9 @@ const Dashboard = () => {
                     </Dialog>
                 </div>
 
-                <div className="flex justify-between">
-                    <div className="flex gap-4 mb-6">
-                        <div className="relative w-full max-w-sm">
+                <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 mb-6">
+                    <div className="flex flex-col sm:flex-row gap-4 w-full xl:w-auto">
+                        <div className="relative w-full sm:max-w-sm">
                             <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                             <Input
                                 placeholder="Search issues..."
@@ -281,9 +281,9 @@ const Dashboard = () => {
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
                         </div>
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 w-full sm:w-auto">
                             <Select value={statusFilter} onValueChange={setStatusFilter}>
-                                <SelectTrigger className="w-[180px]">
+                                <SelectTrigger className="w-full sm:w-[180px]">
                                     <SelectValue placeholder="Filter by Status" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -294,7 +294,7 @@ const Dashboard = () => {
                                     <SelectItem value="Closed">Closed</SelectItem>
                                 </SelectContent>
                             </Select>
-                            <Button variant="outline" className="cursor-pointer" onClick={handleExport}>
+                            <Button variant="outline" className="cursor-pointer flex-1 sm:flex-none" onClick={handleExport}>
                                 <Download className="mr-2 h-4 w-4" /> Export
                             </Button>
                         </div>

@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://node-backend-ashen.c7edgde4fgcqdba5.southindia.azurecontainer.io:5000/api/issues/';
+const API_URL = 'https://backend-apim.azure-api.net/v1/api/issues/';
 
 // Get user issues
 const getIssues = async (token: string, pageNumber: number = 1) => {
