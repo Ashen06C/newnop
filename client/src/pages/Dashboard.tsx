@@ -127,174 +127,176 @@ const Dashboard = () => {
     }
 
     return (
-        <div className="container mx-auto py-8 px-4">
-            <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-                <h1 className="text-3xl font-bold">Issues</h1>
-                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                    <DialogTrigger asChild>
-                        <Button className="cursor-pointer">
-                            <Plus className="mr-2 h-4 w-4" /> New Issue
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-[425px]">
-                        <DialogHeader>
-                            <DialogTitle>Create New Issue</DialogTitle>
-                            <DialogDescription>
-                                Add a new issue to the tracker. Click save when you're done.
-                            </DialogDescription>
-                        </DialogHeader>
-                        <div className="grid gap-4 py-4">
-                            <div className="grid grid-cols-4 items-center gap-4">
-                                <Label htmlFor="title" className="text-right">
-                                    Title
-                                </Label>
-                                <Input
-                                    id="title"
-                                    value={newIssue.title}
-                                    onChange={(e) =>
-                                        setNewIssue({ ...newIssue, title: e.target.value })
-                                    }
-                                    className="col-span-3"
-                                />
+        <div className="min-h-[calc(100vh-64px)] w-full bg-gradient-to-br from-neutral-50 via-white to-neutral-200 dark:from-neutral-900 dark:via-neutral-950 dark:to-black">
+            <div className="container mx-auto py-8 px-4">
+                <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+                    <h1 className="text-3xl font-bold">Issues</h1>
+                    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                        <DialogTrigger asChild>
+                            <Button className="cursor-pointer">
+                                <Plus className="mr-2 h-4 w-4" /> New Issue
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-[425px]">
+                            <DialogHeader>
+                                <DialogTitle>Create New Issue</DialogTitle>
+                                <DialogDescription>
+                                    Add a new issue to the tracker. Click save when you're done.
+                                </DialogDescription>
+                            </DialogHeader>
+                            <div className="grid gap-4 py-4">
+                                <div className="grid grid-cols-4 items-center gap-4">
+                                    <Label htmlFor="title" className="text-right">
+                                        Title
+                                    </Label>
+                                    <Input
+                                        id="title"
+                                        value={newIssue.title}
+                                        onChange={(e) =>
+                                            setNewIssue({ ...newIssue, title: e.target.value })
+                                        }
+                                        className="col-span-3"
+                                    />
+                                </div>
+                                <div className="grid grid-cols-4 items-center gap-4">
+                                    <Label htmlFor="description" className="text-right">
+                                        Description
+                                    </Label>
+                                    <Textarea
+                                        id="description"
+                                        value={newIssue.description}
+                                        onChange={(e) =>
+                                            setNewIssue({ ...newIssue, description: e.target.value })
+                                        }
+                                        className="col-span-3"
+                                    />
+                                </div>
+                                <div className="grid grid-cols-4 items-center gap-4">
+                                    <Label htmlFor="priority" className="text-right">
+                                        Priority
+                                    </Label>
+                                    <Select
+                                        value={newIssue.priority}
+                                        onValueChange={(val) =>
+                                            setNewIssue({ ...newIssue, priority: val })
+                                        }
+                                    >
+                                        <SelectTrigger className="col-span-3">
+                                            <SelectValue placeholder="Select priority" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="Low">Low</SelectItem>
+                                            <SelectItem value="Medium">Medium</SelectItem>
+                                            <SelectItem value="High">High</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="grid grid-cols-4 items-center gap-4">
+                                    <Label htmlFor="severity" className="text-right">
+                                        Severity
+                                    </Label>
+                                    <Select
+                                        value={newIssue.severity}
+                                        onValueChange={(val) =>
+                                            setNewIssue({ ...newIssue, severity: val })
+                                        }
+                                    >
+                                        <SelectTrigger className="col-span-3">
+                                            <SelectValue placeholder="Select severity" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="Low">Low</SelectItem>
+                                            <SelectItem value="Medium">Medium</SelectItem>
+                                            <SelectItem value="High">High</SelectItem>
+                                            <SelectItem value="Critical">Critical</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
                             </div>
-                            <div className="grid grid-cols-4 items-center gap-4">
-                                <Label htmlFor="description" className="text-right">
-                                    Description
-                                </Label>
-                                <Textarea
-                                    id="description"
-                                    value={newIssue.description}
-                                    onChange={(e) =>
-                                        setNewIssue({ ...newIssue, description: e.target.value })
-                                    }
-                                    className="col-span-3"
-                                />
-                            </div>
-                            <div className="grid grid-cols-4 items-center gap-4">
-                                <Label htmlFor="priority" className="text-right">
-                                    Priority
-                                </Label>
-                                <Select
-                                    value={newIssue.priority}
-                                    onValueChange={(val) =>
-                                        setNewIssue({ ...newIssue, priority: val })
-                                    }
-                                >
-                                    <SelectTrigger className="col-span-3">
-                                        <SelectValue placeholder="Select priority" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="Low">Low</SelectItem>
-                                        <SelectItem value="Medium">Medium</SelectItem>
-                                        <SelectItem value="High">High</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            <div className="grid grid-cols-4 items-center gap-4">
-                                <Label htmlFor="severity" className="text-right">
-                                    Severity
-                                </Label>
-                                <Select
-                                    value={newIssue.severity}
-                                    onValueChange={(val) =>
-                                        setNewIssue({ ...newIssue, severity: val })
-                                    }
-                                >
-                                    <SelectTrigger className="col-span-3">
-                                        <SelectValue placeholder="Select severity" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="Low">Low</SelectItem>
-                                        <SelectItem value="Medium">Medium</SelectItem>
-                                        <SelectItem value="High">High</SelectItem>
-                                        <SelectItem value="Critical">Critical</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                        </div>
-                        <DialogFooter>
-                            <Button onClick={handleCreateIssue}>Save changes</Button>
-                        </DialogFooter>
-                    </DialogContent>
-                </Dialog>
-            </div>
-
-            <div className="flex gap-4 mb-6">
-                <div className="relative w-full max-w-sm">
-                    <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input
-                        placeholder="Search issues..."
-                        className="pl-8"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
+                            <DialogFooter>
+                                <Button onClick={handleCreateIssue}>Save changes</Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
                 </div>
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                    <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="Filter by Status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="All">All Statuses</SelectItem>
-                        <SelectItem value="Open">Open</SelectItem>
-                        <SelectItem value="In Progress">In Progress</SelectItem>
-                        <SelectItem value="Resolved">Resolved</SelectItem>
-                        <SelectItem value="Closed">Closed</SelectItem>
-                    </SelectContent>
-                </Select>
-            </div>
 
-            <div className="rounded-md border">
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Title</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead>Description</TableHead>
-                            <TableHead>Created By</TableHead>
-                            <TableHead>Priority</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {filteredIssues.length > 0 ? (
-                            filteredIssues.map((issue) => (
-                                <TableRow key={issue._id}>
-                                    <TableCell className="font-medium">{issue.title}</TableCell>
-                                    <TableCell>
-                                        <Badge variant={getStatusBadgeVariant(issue.status) as any}>
-                                            {issue.status}
-                                        </Badge>
-                                    </TableCell>
-                                    <TableCell className="max-w-[200px] truncate">
-                                        {issue.description}
-                                    </TableCell>
-                                    <TableCell>{issue.createdBy?.name || 'Unknown'}</TableCell>
-                                    <TableCell>
-                                        <Badge variant={getPriorityBadgeVariant(issue.priority) as any}>
-                                            {issue.priority}
-                                        </Badge>
-                                    </TableCell>
-                                    <TableCell className="text-right">
-                                        <Button
-                                            className="cursor-pointer"
-                                            variant="ghost"
-                                            size="sm"
-                                            onClick={() => navigate(`/issues/${issue._id}`)}
-                                        >
-                                            View
-                                            <ArrowRight className="h-4 w-4" />
-                                        </Button>
+                <div className="flex gap-4 mb-6">
+                    <div className="relative w-full max-w-sm">
+                        <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            placeholder="Search issues..."
+                            className="pl-8"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                    </div>
+                    <Select value={statusFilter} onValueChange={setStatusFilter}>
+                        <SelectTrigger className="w-[180px]">
+                            <SelectValue placeholder="Filter by Status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="All">All Statuses</SelectItem>
+                            <SelectItem value="Open">Open</SelectItem>
+                            <SelectItem value="In Progress">In Progress</SelectItem>
+                            <SelectItem value="Resolved">Resolved</SelectItem>
+                            <SelectItem value="Closed">Closed</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+
+                <div className="rounded-md border bg-card text-card-foreground shadow-sm">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Title</TableHead>
+                                <TableHead>Status</TableHead>
+                                <TableHead>Description</TableHead>
+                                <TableHead>Created By</TableHead>
+                                <TableHead>Priority</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {filteredIssues.length > 0 ? (
+                                filteredIssues.map((issue) => (
+                                    <TableRow key={issue._id}>
+                                        <TableCell className="font-medium">{issue.title}</TableCell>
+                                        <TableCell>
+                                            <Badge variant={getStatusBadgeVariant(issue.status) as any}>
+                                                {issue.status}
+                                            </Badge>
+                                        </TableCell>
+                                        <TableCell className="max-w-[200px] truncate">
+                                            {issue.description}
+                                        </TableCell>
+                                        <TableCell>{issue.createdBy?.name || 'Unknown'}</TableCell>
+                                        <TableCell>
+                                            <Badge variant={getPriorityBadgeVariant(issue.priority) as any}>
+                                                {issue.priority}
+                                            </Badge>
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                            <Button
+                                                className="cursor-pointer"
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => navigate(`/issues/${issue._id}`)}
+                                            >
+                                                View
+                                                <ArrowRight className="h-4 w-4" />
+                                            </Button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={5} className="h-24 text-center">
+                                        No results.
                                     </TableCell>
                                 </TableRow>
-                            ))
-                        ) : (
-                            <TableRow>
-                                <TableCell colSpan={5} className="h-24 text-center">
-                                    No results.
-                                </TableCell>
-                            </TableRow>
-                        )}
-                    </TableBody>
-                </Table>
+                            )}
+                        </TableBody>
+                    </Table>
+                </div>
             </div>
         </div>
     );

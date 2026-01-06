@@ -26,24 +26,24 @@ const Header = () => {
     };
 
     return (
-        <header className="border-b bg-background">
+        <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-gradient-to-r from-black to-neutral-700 text-white shadow-md">
             <div className="container mx-auto flex h-16 items-center justify-between px-4">
-                <Link to="/" className="text-2xl font-bold tracking-tight">
+                <Link to="/" className="text-2xl font-bold tracking-tight flex items-center gap-2">
                     Issue Tracker
                 </Link>
 
                 <nav className="flex items-center gap-4">
                     {user ? (
                         <>
-                            <Button variant="ghost" asChild>
+                            <Button variant="ghost" className="text-white hover:bg-white/20 hover:text-white" asChild>
                                 <Link to="/">Dashboard</Link>
                             </Button>
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" className="relative h-8 w-8 rounded-full cursor-pointer">
-                                        <Avatar className="h-8 w-8">
+                                    <Button variant="ghost" className="relative h-8 w-8 rounded-full cursor-pointer hover:bg-white/20">
+                                        <Avatar className="h-8 w-8 border-2 border-white/50">
                                             <AvatarImage src="/avatars/01.png" alt="@shadcn" />
-                                            <AvatarFallback>{user.name ? user.name.charAt(0).toUpperCase() : 'U'}</AvatarFallback>
+                                            <AvatarFallback className="text-black">{user.name ? user.name.charAt(0).toUpperCase() : 'U'}</AvatarFallback>
                                         </Avatar>
                                     </Button>
                                 </DropdownMenuTrigger>
@@ -66,10 +66,10 @@ const Header = () => {
                         </>
                     ) : (
                         <>
-                            <Button variant="ghost" asChild>
+                            <Button variant="ghost" className="text-white hover:bg-white/20 hover:text-white" asChild>
                                 <Link to="/login">Login</Link>
                             </Button>
-                            <Button asChild>
+                            <Button className="bg-white text-black hover:bg-gray-200" asChild>
                                 <Link to="/register">Register</Link>
                             </Button>
                         </>

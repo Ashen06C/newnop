@@ -56,8 +56,8 @@ const LoginPage = () => {
     };
 
     return (
-        <div className="flex items-center justify-center min-h-[calc(100vh-64px)] bg-muted/40 p-4">
-            <Card className="w-full max-w-sm">
+        <div className="flex items-center justify-center min-h-[calc(100vh-64px)] w-full p-4 bg-gradient-to-br from-neutral-50 via-white to-neutral-200 dark:from-neutral-900 dark:via-neutral-950 dark:to-black">
+            <Card className="w-full max-w-sm shadow-xl border-border/40 bg-card/50 backdrop-blur-xl">
                 <CardHeader>
                     <CardTitle className="text-2xl">Login</CardTitle>
                     <CardDescription>
