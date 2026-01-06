@@ -3,14 +3,14 @@ import axios from 'axios';
 const API_URL = 'http://localhost:5000/api/issues/';
 
 // Get user issues
-const getIssues = async (token: string) => {
+const getIssues = async (token: string, pageNumber: number = 1) => {
     const config = {
         headers: {
             Authorization: `Bearer ${token}`,
         },
     };
 
-    const response = await axios.get(API_URL, config);
+    const response = await axios.get(`${API_URL}?pageNumber=${pageNumber}`, config);
 
     return response.data;
 };

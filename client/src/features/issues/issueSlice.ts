@@ -23,6 +23,14 @@ interface IssueState {
     isSuccess: boolean;
     isLoading: boolean;
     message: string;
+    page: number;
+    pages: number;
+    stats: {
+        open: number;
+        inProgress: number;
+        resolved: number;
+        closed: number;
+    };
 }
 
 const initialState: IssueState = {
@@ -31,6 +39,14 @@ const initialState: IssueState = {
     isSuccess: false,
     isLoading: false,
     message: '',
+    page: 1,
+    pages: 1,
+    stats: {
+        open: 0,
+        inProgress: 0,
+        resolved: 0,
+        closed: 0,
+    },
 };
 
 // Create new issue
@@ -56,11 +72,11 @@ export const createIssue = createAsyncThunk(
 // Get user issues
 export const getIssues = createAsyncThunk(
     'issues/getAll',
-    async (_, thunkAPI) => {
+    async (pageNumber: number | undefined, thunkAPI) => {
         try {
             const state = thunkAPI.getState() as any;
             const token = state.auth.user.token;
-            return await issueService.getIssues(token);
+            return await issueService.getIssues(token, pageNumber || 1);
         } catch (error: any) {
             const message =
                 (error.response &&
@@ -146,6 +162,9 @@ export const issueSlice = createSlice({
                 state.isLoading = false;
                 state.isSuccess = true;
                 state.issues = action.payload.issues;
+                state.page = action.payload.page;
+                state.pages = action.payload.pages;
+                state.stats = action.payload.stats;
             })
             .addCase(getIssues.rejected, (state, action) => {
                 state.isLoading = false;

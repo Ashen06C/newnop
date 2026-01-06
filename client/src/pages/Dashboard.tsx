@@ -32,7 +32,8 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, Plus, Search, ArrowRight, Download } from 'lucide-react';
+import { Loader2, Plus, Search, ArrowRight, Download, ChevronLeft, ChevronRight } from 'lucide-react';
+import StatusCards from '@/components/StatusCards';
 
 import { toast } from 'sonner';
 
@@ -41,12 +42,13 @@ const Dashboard = () => {
     const dispatch = useDispatch<AppDispatch>();
 
     const { user } = useSelector((state: RootState) => state.auth);
-    const { issues, isLoading, isError, message } = useSelector(
+    const { issues, isLoading, isError, message, page, pages, stats } = useSelector(
         (state: RootState) => state.issue
     );
 
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('All');
+    const [currentPage, setCurrentPage] = useState(1);
     const [newIssue, setNewIssue] = useState({
         title: '',
         description: '',
@@ -65,13 +67,13 @@ const Dashboard = () => {
         if (!user) {
             navigate('/login');
         } else {
-            dispatch(getIssues());
+            dispatch(getIssues(currentPage));
         }
 
         return () => {
             dispatch(reset());
         };
-    }, [user, navigate, isError, message, dispatch]);
+    }, [user, navigate, isError, message, dispatch, currentPage]);
 
     const filteredIssues = issues.filter((issue) => {
         const matchesSearch = issue.title
@@ -115,6 +117,7 @@ const Dashboard = () => {
                 });
                 setErrors({ title: '', description: '' });
                 toast.success("Issue created successfully");
+                dispatch(getIssues(currentPage)); // Refresh list
             }
         });
     };
@@ -158,13 +161,13 @@ const Dashboard = () => {
         }
     };
 
-    if (isLoading) {
+    if (isLoading && !issues.length) {
         return <div className="flex justify-center p-8"><Loader2 className="animate-spin" /></div>;
     }
 
     return (
         <div className="min-h-[calc(100vh-64px)] w-full bg-gradient-to-br from-neutral-50 via-white to-neutral-200 dark:from-neutral-900 dark:via-neutral-950 dark:to-black">
-            <div className="container mx-auto py-8 px-4">
+            <div className="container mx-auto py-4 px-4">
                 <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
                     <h1 className="text-3xl font-bold">Issues</h1>
                     <Dialog open={isDialogOpen} onOpenChange={(open) => {
@@ -267,33 +270,36 @@ const Dashboard = () => {
                     </Dialog>
                 </div>
 
-                <div className="flex gap-4 mb-6">
-                    <div className="relative w-full max-w-sm">
-                        <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                        <Input
-                            placeholder="Search issues..."
-                            className="pl-8"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
+                <div className="flex justify-between">
+                    <div className="flex gap-4 mb-6">
+                        <div className="relative w-full max-w-sm">
+                            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                            <Input
+                                placeholder="Search issues..."
+                                className="pl-8"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                        </div>
+                        <div className="flex gap-2">
+                            <Select value={statusFilter} onValueChange={setStatusFilter}>
+                                <SelectTrigger className="w-[180px]">
+                                    <SelectValue placeholder="Filter by Status" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="All">All Statuses</SelectItem>
+                                    <SelectItem value="Open">Open</SelectItem>
+                                    <SelectItem value="In Progress">In Progress</SelectItem>
+                                    <SelectItem value="Resolved">Resolved</SelectItem>
+                                    <SelectItem value="Closed">Closed</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <Button variant="outline" className="cursor-pointer" onClick={handleExport}>
+                                <Download className="mr-2 h-4 w-4" /> Export
+                            </Button>
+                        </div>
                     </div>
-                    <div className="flex gap-2">
-                        <Select value={statusFilter} onValueChange={setStatusFilter}>
-                            <SelectTrigger className="w-[180px]">
-                                <SelectValue placeholder="Filter by Status" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="All">All Statuses</SelectItem>
-                                <SelectItem value="Open">Open</SelectItem>
-                                <SelectItem value="In Progress">In Progress</SelectItem>
-                                <SelectItem value="Resolved">Resolved</SelectItem>
-                                <SelectItem value="Closed">Closed</SelectItem>
-                            </SelectContent>
-                        </Select>
-                        <Button variant="outline" className="cursor-pointer" onClick={handleExport}>
-                            <Download className="mr-2 h-4 w-4" /> Export
-                        </Button>
-                    </div>
+                    <StatusCards stats={stats} />
                 </div>
 
                 <div className="rounded-md border bg-card text-card-foreground shadow-sm">
@@ -341,7 +347,7 @@ const Dashboard = () => {
                                 ))
                             ) : (
                                 <TableRow>
-                                    <TableCell colSpan={5} className="h-24 text-center">
+                                    <TableCell colSpan={6} className="h-24 text-center">
                                         No results.
                                     </TableCell>
                                 </TableRow>
@@ -349,6 +355,32 @@ const Dashboard = () => {
                         </TableBody>
                     </Table>
                 </div>
+
+                {pages > 1 && (
+                    <div className="flex items-center justify-end space-x-2 py-4">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                            disabled={currentPage === 1 || isLoading}
+                        >
+                            <ChevronLeft className="h-4 w-4" />
+                            Previous
+                        </Button>
+                        <div className="text-sm font-medium">
+                            Page {page} of {pages}
+                        </div>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setCurrentPage(prev => Math.min(prev + 1, pages))}
+                            disabled={currentPage === pages || isLoading}
+                        >
+                            Next
+                            <ChevronRight className="h-4 w-4" />
+                        </Button>
+                    </div>
+                )}
             </div>
         </div>
     );

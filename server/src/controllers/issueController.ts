@@ -28,7 +28,23 @@ export const getIssues = async (req: Request, res: Response) => {
             .limit(pageSize)
             .skip(pageSize * (page - 1));
 
-        res.json({ issues, page, pages: Math.ceil(count / pageSize) });
+        // Calculate stats
+        const openCount = await Issue.countDocuments({ status: 'Open' });
+        const inProgressCount = await Issue.countDocuments({ status: 'In Progress' });
+        const resolvedCount = await Issue.countDocuments({ status: 'Resolved' });
+        const closedCount = await Issue.countDocuments({ status: 'Closed' });
+
+        res.json({
+            issues,
+            page,
+            pages: Math.ceil(count / pageSize),
+            stats: {
+                open: openCount,
+                inProgress: inProgressCount,
+                resolved: resolvedCount,
+                closed: closedCount
+            }
+        });
     } catch (error) {
         if (error instanceof Error) {
             res.status(500).json({ message: error.message });
