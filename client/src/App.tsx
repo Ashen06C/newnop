@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import IssueDetailsPage from './pages/IssueDetailsPage';
+import { Toaster } from './components/ui/sonner';
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
             <Route path="/issues/:id" element={<IssueDetailsPage />} />
           </Routes>
         </main>
+        <Toaster />
       </div>
     </Router>
   );

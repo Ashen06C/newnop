@@ -1,17 +1,9 @@
 import express from 'express';
-import {
-    getIssues,
-    getIssueById,
-    createIssue,
-    updateIssue,
-    deleteIssue,
-    exportIssues,
-} from '../controllers/issueController';
+import { getIssues, createIssue, updateIssue, deleteIssue, getIssueById } from '../controllers/issueController';
 import { protect } from '../middleware/authMiddleware';
 
 const router = express.Router();
 
-router.get('/export', protect, exportIssues);
 router.route('/').get(protect, getIssues).post(protect, createIssue);
 router
     .route('/:id')

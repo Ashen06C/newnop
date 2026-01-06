@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { toast } from 'sonner';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { login, reset } from '../features/auth/authSlice';
@@ -7,13 +8,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Eye, EyeOff } from 'lucide-react';
 
 const LoginPage = () => {
     const [formData, setFormData] = useState({
         email: '',
         password: '',
     });
+    const [showPassword, setShowPassword] = useState(false);
 
     const { email, password } = formData;
 
@@ -26,11 +28,17 @@ const LoginPage = () => {
 
     useEffect(() => {
         if (isError) {
-            // Toast or alert could go here
-            console.error(message);
+            toast.error(message || "Login failed");
         }
 
-        if (isSuccess || user) {
+        if (isSuccess) {
+            toast.success("Welcome back!", {
+                description: "You have successfully logged in."
+            });
+            navigate('/');
+        }
+
+        if (user) {
             navigate('/');
         }
 
@@ -80,14 +88,29 @@ const LoginPage = () => {
                         </div>
                         <div className="grid gap-2">
                             <Label htmlFor="password">Password</Label>
-                            <Input
-                                id="password"
-                                name="password"
-                                type="password"
-                                required
-                                value={password}
-                                onChange={onChange}
-                            />
+                            <div className="relative">
+                                <Input
+                                    id="password"
+                                    name="password"
+                                    type={showPassword ? "text" : "password"}
+                                    required
+                                    value={password}
+                                    onChange={onChange}
+                                />
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent cursor-pointer"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                >
+                                    {showPassword ? (
+                                        <EyeOff className="h-4 w-4 text-muted-foreground" />
+                                    ) : (
+                                        <Eye className="h-4 w-4 text-muted-foreground" />
+                                    )}
+                                </Button>
+                            </div>
                         </div>
                     </CardContent>
                     <CardFooter className="flex flex-col gap-4">

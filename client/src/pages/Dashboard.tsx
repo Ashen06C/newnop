@@ -32,7 +32,9 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, Plus, Search, ArrowRight } from 'lucide-react';
+import { Loader2, Plus, Search, ArrowRight, Download } from 'lucide-react';
+
+import { toast } from 'sonner';
 
 const Dashboard = () => {
     const navigate = useNavigate();
@@ -52,6 +54,7 @@ const Dashboard = () => {
         severity: 'Medium',
         status: 'Open',
     });
+    const [errors, setErrors] = useState({ title: '', description: '' });
     const [isDialogOpen, setIsDialogOpen] = useState(false);
 
     useEffect(() => {
@@ -79,7 +82,27 @@ const Dashboard = () => {
         return matchesSearch && matchesStatus;
     });
 
+    const validateForm = () => {
+        let isValid = true;
+        const newErrors = { title: '', description: '' };
+
+        if (!newIssue.title.trim()) {
+            newErrors.title = 'Title is required';
+            isValid = false;
+        }
+
+        if (!newIssue.description.trim()) {
+            newErrors.description = 'Description is required';
+            isValid = false;
+        }
+
+        setErrors(newErrors);
+        return isValid;
+    };
+
     const handleCreateIssue = () => {
+        if (!validateForm()) return;
+
         dispatch(createIssue(newIssue)).then((res) => {
             if (res.meta.requestStatus === 'fulfilled') {
                 setIsDialogOpen(false);
@@ -90,8 +113,21 @@ const Dashboard = () => {
                     severity: 'Medium',
                     status: 'Open',
                 });
+                setErrors({ title: '', description: '' });
+                toast.success("Issue created successfully");
             }
         });
+    };
+
+    const handleExport = () => {
+        const jsonString = `data:text/json;chatset=utf-8,${encodeURIComponent(
+            JSON.stringify(filteredIssues)
+        )}`;
+        const link = document.createElement('a');
+        link.href = jsonString;
+        link.download = 'issues.json';
+
+        link.click();
     };
 
     const getStatusBadgeVariant = (status: string) => {
@@ -131,7 +167,10 @@ const Dashboard = () => {
             <div className="container mx-auto py-8 px-4">
                 <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
                     <h1 className="text-3xl font-bold">Issues</h1>
-                    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                    <Dialog open={isDialogOpen} onOpenChange={(open) => {
+                        setIsDialogOpen(open);
+                        if (!open) setErrors({ title: '', description: '' });
+                    }}>
                         <DialogTrigger asChild>
                             <Button className="cursor-pointer">
                                 <Plus className="mr-2 h-4 w-4" /> New Issue
@@ -149,27 +188,35 @@ const Dashboard = () => {
                                     <Label htmlFor="title" className="text-right">
                                         Title
                                     </Label>
-                                    <Input
-                                        id="title"
-                                        value={newIssue.title}
-                                        onChange={(e) =>
-                                            setNewIssue({ ...newIssue, title: e.target.value })
-                                        }
-                                        className="col-span-3"
-                                    />
+                                    <div className="col-span-3">
+                                        <Input
+                                            id="title"
+                                            value={newIssue.title}
+                                            onChange={(e) => {
+                                                setNewIssue({ ...newIssue, title: e.target.value });
+                                                if (errors.title) setErrors({ ...errors, title: '' });
+                                            }}
+                                            className={errors.title ? "border-red-500" : ""}
+                                        />
+                                        {errors.title && <span className="text-xs text-red-500">{errors.title}</span>}
+                                    </div>
                                 </div>
                                 <div className="grid grid-cols-4 items-center gap-4">
                                     <Label htmlFor="description" className="text-right">
                                         Description
                                     </Label>
-                                    <Textarea
-                                        id="description"
-                                        value={newIssue.description}
-                                        onChange={(e) =>
-                                            setNewIssue({ ...newIssue, description: e.target.value })
-                                        }
-                                        className="col-span-3"
-                                    />
+                                    <div className="col-span-3">
+                                        <Textarea
+                                            id="description"
+                                            value={newIssue.description}
+                                            onChange={(e) => {
+                                                setNewIssue({ ...newIssue, description: e.target.value });
+                                                if (errors.description) setErrors({ ...errors, description: '' });
+                                            }}
+                                            className={errors.description ? "border-red-500" : ""}
+                                        />
+                                        {errors.description && <span className="text-xs text-red-500">{errors.description}</span>}
+                                    </div>
                                 </div>
                                 <div className="grid grid-cols-4 items-center gap-4">
                                     <Label htmlFor="priority" className="text-right">
@@ -230,18 +277,23 @@ const Dashboard = () => {
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </div>
-                    <Select value={statusFilter} onValueChange={setStatusFilter}>
-                        <SelectTrigger className="w-[180px]">
-                            <SelectValue placeholder="Filter by Status" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="All">All Statuses</SelectItem>
-                            <SelectItem value="Open">Open</SelectItem>
-                            <SelectItem value="In Progress">In Progress</SelectItem>
-                            <SelectItem value="Resolved">Resolved</SelectItem>
-                            <SelectItem value="Closed">Closed</SelectItem>
-                        </SelectContent>
-                    </Select>
+                    <div className="flex gap-2">
+                        <Select value={statusFilter} onValueChange={setStatusFilter}>
+                            <SelectTrigger className="w-[180px]">
+                                <SelectValue placeholder="Filter by Status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="All">All Statuses</SelectItem>
+                                <SelectItem value="Open">Open</SelectItem>
+                                <SelectItem value="In Progress">In Progress</SelectItem>
+                                <SelectItem value="Resolved">Resolved</SelectItem>
+                                <SelectItem value="Closed">Closed</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <Button variant="outline" className="cursor-pointer" onClick={handleExport}>
+                            <Download className="mr-2 h-4 w-4" /> Export
+                        </Button>
+                    </div>
                 </div>
 
                 <div className="rounded-md border bg-card text-card-foreground shadow-sm">

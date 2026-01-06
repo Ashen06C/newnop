@@ -29,6 +29,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Loader2, ArrowLeft, Trash2, Save, Calendar, User as UserIcon } from 'lucide-react';
 
+import { toast } from 'sonner';
+
 const IssueDetailsPage = () => {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -46,6 +48,7 @@ const IssueDetailsPage = () => {
     const [status, setStatus] = useState('');
     const [priority, setPriority] = useState('');
     const [severity, setSeverity] = useState('');
+    const [errors, setErrors] = useState({ title: '', description: '' });
 
     useEffect(() => {
         if (!user) {
@@ -66,7 +69,18 @@ const IssueDetailsPage = () => {
         }
     }, [id, issues, user, navigate]);
 
+    useEffect(() => {
+        const newErrors = { title: '', description: '' };
+        if (title !== undefined && !title.trim()) newErrors.title = 'Title is required';
+        if (description !== undefined && !description.trim()) newErrors.description = 'Description is required';
+        setErrors(newErrors);
+    }, [title, description]);
+
+    
+
     const handleUpdate = () => {
+        if (errors.title || errors.description) return;
+
         dispatch(updateIssue({
             id: id!,
             issueData: {
@@ -76,16 +90,25 @@ const IssueDetailsPage = () => {
                 priority,
                 severity,
             }
-        }));
+        })).then((res) => {
+            if (res.meta.requestStatus === 'fulfilled') {
+                toast.success("Issue updated successfully");
+            }
+        });
     };
 
     const handleDelete = () => {
-        dispatch(deleteIssue(id!)).then(() => {
-            navigate('/');
+        dispatch(deleteIssue(id!)).then((res) => {
+            if (res.meta.requestStatus === 'fulfilled') {
+                toast.success("Issue deleted successfully");
+                navigate('/');
+            }
         });
     };
 
     if (!issue || isLoading) return <div className="flex justify-center p-8"><Loader2 className="animate-spin" /></div>;
+
+    const isFormValid = !errors.title && !errors.description && title.trim() !== '' && description.trim() !== '';
 
     return (
         <div className="min-h-[calc(100vh-64px)] w-full bg-gradient-to-br from-neutral-50 via-white to-neutral-200 dark:from-neutral-900 dark:via-neutral-950 dark:to-black">
@@ -109,9 +132,10 @@ const IssueDetailsPage = () => {
                                         id="title"
                                         value={title}
                                         onChange={(e) => setTitle(e.target.value)}
-                                        className="text-lg font-medium h-12"
+                                        className={`text-lg font-medium h-12 ${errors.title ? "border-red-500" : ""}`}
                                         placeholder="Issue Title"
                                     />
+                                    {errors.title && <span className="text-xs text-red-500">{errors.title}</span>}
                                 </div>
 
                                 <div className="space-y-2">
@@ -120,9 +144,10 @@ const IssueDetailsPage = () => {
                                         id="description"
                                         value={description}
                                         onChange={(e) => setDescription(e.target.value)}
-                                        className="min-h-[300px] text-base leading-relaxed"
+                                        className={`min-h-[300px] text-base leading-relaxed ${errors.description ? "border-red-500" : ""}`}
                                         placeholder="Detailed description of the issue..."
                                     />
+                                    {errors.description && <span className="text-xs text-red-500">{errors.description}</span>}
                                 </div>
                             </CardContent>
                         </Card>
@@ -204,7 +229,7 @@ const IssueDetailsPage = () => {
                         <div className="flex flex-row gap-3">
                             <AlertDialog>
                                 <AlertDialogTrigger asChild>
-                                    <Button size="lg" className="w-full cursor-pointer">
+                                    <Button size="lg" className="w-full cursor-pointer" disabled={!isFormValid}>
                                         <Save className="mr-2 h-4 w-4" /> Save Changes
                                     </Button>
                                 </AlertDialogTrigger>

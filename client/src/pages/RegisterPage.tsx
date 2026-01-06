@@ -7,7 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Eye, EyeOff } from 'lucide-react';
+import { toast } from 'sonner';
 
 const RegisterPage = () => {
     const [formData, setFormData] = useState({
@@ -16,6 +17,8 @@ const RegisterPage = () => {
         password: '',
         confirmPassword: '',
     });
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     const { name, email, password, confirmPassword } = formData;
 
@@ -28,10 +31,17 @@ const RegisterPage = () => {
 
     useEffect(() => {
         if (isError) {
-            console.error(message);
+            toast.error(message || "Registration failed");
         }
 
-        if (isSuccess || user) {
+        if (isSuccess) {
+            toast.success("Account created!", {
+                description: "You have successfully registered."
+            });
+            navigate('/');
+        }
+
+        if (user) {
             navigate('/');
         }
 
@@ -49,7 +59,7 @@ const RegisterPage = () => {
         e.preventDefault();
 
         if (password !== confirmPassword) {
-            console.error('Passwords do not match');
+            toast.error("Passwords do not match");
             return;
         }
 
@@ -98,25 +108,55 @@ const RegisterPage = () => {
                         </div>
                         <div className="grid gap-2">
                             <Label htmlFor="password">Password</Label>
-                            <Input
-                                id="password"
-                                name="password"
-                                type="password"
-                                required
-                                value={password}
-                                onChange={onChange}
-                            />
+                            <div className="relative">
+                                <Input
+                                    id="password"
+                                    name="password"
+                                    type={showPassword ? "text" : "password"}
+                                    required
+                                    value={password}
+                                    onChange={onChange}
+                                />
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent cursor-pointer"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                >
+                                    {showPassword ? (
+                                        <EyeOff className="h-4 w-4 text-muted-foreground" />
+                                    ) : (
+                                        <Eye className="h-4 w-4 text-muted-foreground" />
+                                    )}
+                                </Button>
+                            </div>
                         </div>
                         <div className="grid gap-2">
                             <Label htmlFor="confirmPassword">Confirm Password</Label>
-                            <Input
-                                id="confirmPassword"
-                                name="confirmPassword"
-                                type="password"
-                                required
-                                value={confirmPassword}
-                                onChange={onChange}
-                            />
+                            <div className="relative">
+                                <Input
+                                    id="confirmPassword"
+                                    name="confirmPassword"
+                                    type={showConfirmPassword ? "text" : "password"}
+                                    required
+                                    value={confirmPassword}
+                                    onChange={onChange}
+                                />
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent cursor-pointer"
+                                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                >
+                                    {showConfirmPassword ? (
+                                        <EyeOff className="h-4 w-4 text-muted-foreground" />
+                                    ) : (
+                                        <Eye className="h-4 w-4 text-muted-foreground" />
+                                    )}
+                                </Button>
+                            </div>
                         </div>
                     </CardContent>
                     <CardFooter className="flex flex-col gap-4">
